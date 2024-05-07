@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 use function App\Helpers\formatErrorResponse;
-use function PHPUnit\Framework\isNull;
 
 class UserController extends Controller
 {
@@ -22,7 +21,7 @@ class UserController extends Controller
         try {
             $users = DB::table('users')
                 ->orderBy('id', 'desc')
-                ->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'status']);
+                ->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'status', 'numero_empleado']);
             return response()->json(formatErrorResponse(false, '', $users));
         } catch (\Exception $e) {
             return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
@@ -32,7 +31,7 @@ class UserController extends Controller
     public static function getUsersManagers()
     {
         try {
-            $usersManagers = DB::table('users')->where('tipo', '=', 'Gerente')->get(['id', 'nombre', 'apellidos', 'email', 'tipo']);
+            $usersManagers = DB::table('users')->where('tipo', '=', 'Gerente')->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'numero_empleado']);
             return response()->json(formatErrorResponse(false, '', $usersManagers));
         } catch (\Exception $e) {
             return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
@@ -42,7 +41,7 @@ class UserController extends Controller
     public static function getUsersValidator()
     {
         try {
-            $usersManagers = DB::table('users')->where('tipo', '=', 'Validador')->get(['id', 'nombre', 'apellidos', 'email', 'tipo']);
+            $usersManagers = DB::table('users')->where('tipo', '=', 'Validador')->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'numero_empleado']);
             return response()->json(formatErrorResponse(false, '', $usersManagers));
         } catch (\Exception $e) {
             return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
@@ -52,7 +51,7 @@ class UserController extends Controller
     public static function getUsersCatcher()
     {
         try {
-            $usersSupervisor = DB::table('users')->where('tipo', '=', 'Capturador')->get(['id', 'nombre', 'apellidos', 'email', 'tipo']);
+            $usersSupervisor = DB::table('users')->where('tipo', '=', 'Capturador')->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'numero_empleado']);
             return response()->json(formatErrorResponse(false, '', $usersSupervisor));
         } catch (\Exception $e) {
             return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
@@ -67,6 +66,7 @@ class UserController extends Controller
             'tipo' => ['required'],
             'email' => ['required'],
             'password' => ['required'],
+            'numero_empleado' => ['required']
         ];
 
         $validator = Validator::make($request->all(), $rulesValidation);
@@ -85,7 +85,9 @@ class UserController extends Controller
                     'email' => SodiumUtil::decryptData($request->email),
                     'password' => Hash::make(SodiumUtil::decryptData($request->password)),
                     'status' => 'Activo',
-                    'created_at' => Carbon::now()
+                    'numero_empleado' => SodiumUtil::decryptData($request->numero_empleado),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
                 ]);
                 return response()->json(formatErrorResponse(false, 'Usuario creado correctamente', []));
             }

@@ -40,6 +40,7 @@ class AuthController extends Controller
                     $user = Auth::user();
                     $user->email = SodiumUtil::encryptData($user->email);
                     $user->tipo = SodiumUtil::encryptData($user->tipo);
+                    $user->numero_empleado = SodiumUtil::encryptData($user->numero_empleado);
                     $token = $user->createToken('authToken');
                     //$plainTextToken = $newAccessToken->plainTextToken;
                     $user->token = $token->plainTextToken;

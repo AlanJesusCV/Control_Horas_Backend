@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\ActividadesController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DespachoController;
@@ -66,7 +67,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Users Fin
 
     // Actividades Inicio
-
+    Route::post('/activity/create-activity', [ActividadesController::class, 'createActivity']);
+    Route::post('/activity/put-activity/{id}', [ActividadesController::class, 'editActivity']);
+    Route::post('/activity/post-validate-activity', [ActividadesController::class, 'validateActivity']);
+    Route::delete('/activity/delete-activity/{id}', [ActividadesController::class, 'deleteActivity']);
     // Actividades Fin
 
 });
