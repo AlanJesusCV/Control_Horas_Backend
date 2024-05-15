@@ -56,6 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Users Inicio
     Route::get('/user/get-users-general', [UserController::class, 'getUsers']);
+    Route::get('/user/get-users-autocomplete', [UserController::class, 'getUsersAutocomplete']);
     Route::get('/user/get-manager-type', [UserController::class, 'getUsersManagers']);
     Route::get('/user/get-catcher-type', [UserController::class, 'getUsersCatcher']);
     Route::get('/user/get-validator-type', [UserController::class, 'getUsersValidator']);
@@ -71,6 +72,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/activity/put-activity/{id}', [ActividadesController::class, 'editActivity']);
     Route::post('/activity/post-validate-activity', [ActividadesController::class, 'validateActivity']);
     Route::delete('/activity/delete-activity/{id}', [ActividadesController::class, 'deleteActivity']);
+    Route::get('/activity/get-activities-by-period/{id}/{fechaInicio}/{fechaFin}', [ActividadesController::class, 'getActivitiesByUser']);
+    Route::get('/activity/get-activities-by-user/{id}/{fechaActividad}', [ActividadesController::class, 'getIndividualActivities']);
+
     // Actividades Fin
 
 });

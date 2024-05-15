@@ -21,13 +21,25 @@ class UserController extends Controller
         try {
             $users = DB::table('users')
                 ->orderBy('id', 'desc')
-                ->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'status', 'numero_empleado']);
+                ->get(['id', 'nombre', 'apellidos', 'email', 'tipo', 'status', 'numero_empleado', 'status']);
             return response()->json(formatErrorResponse(false, '', $users));
         } catch (\Exception $e) {
             return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
         }
     }
 
+    public function getUsersAutocomplete()
+    {
+        try {
+            $users = DB::table('users')
+            ->select(DB::raw("CONCAT(CONCAT(nombre, ' ', apellidos), ' (', numero_empleado, ')') AS empleado"))
+            ->orderBy('id', 'desc')
+            ->get();
+            return response()->json(formatErrorResponse(false, '', $users));
+        } catch (\Exception $e) {
+            return response()->json(formatErrorResponse(true, 'Ocurrio un error, intente de nuevo y si el problema persiste contacte con el departamento de TI.', base64_encode($e->getMessage())));
+        }
+    }
     public static function getUsersManagers()
     {
         try {
@@ -75,17 +87,17 @@ class UserController extends Controller
         }
 
         try {
-            if (DB::table('users')->where('email', SodiumUtil::decryptData($request->email))->exists()) {
+            if (DB::table('users')->where('email', $request->email)->exists()) {
                 return response()->json(formatErrorResponse(true, 'El usuario ya existe en el sistema, intente de nuevo con otro valor.', []));
             } else {
                 DB::table('users')->insertGetId([
                     'nombre' => $request->nombre,
                     'apellidos' => $request->apellidos,
-                    'tipo' => SodiumUtil::decryptData($request->tipo),
-                    'email' => SodiumUtil::decryptData($request->email),
-                    'password' => Hash::make(SodiumUtil::decryptData($request->password)),
+                    'tipo' => $request->tipo,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
                     'status' => 'Activo',
-                    'numero_empleado' => SodiumUtil::decryptData($request->numero_empleado),
+                    'numero_empleado' => $request->numero_empleado,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now()
                 ]);
@@ -99,7 +111,6 @@ class UserController extends Controller
     public static function logicalDeleteUser($id)
     {
         try {
-            $id = SodiumUtil::decryptData($id);
             $user = DB::table('users')->where('id', $id)->first();
             if ($user) {
                 if ($user->status == 'Activo') {
@@ -157,7 +168,6 @@ class UserController extends Controller
     public static function updateUser(Request $request, $id)
     {
         try {
-            $id = SodiumUtil::decryptData($id);
             $rulesValidation = [
                 'nombre' => ['required'],
                 'apellidos' => ['required'],
@@ -175,7 +185,7 @@ class UserController extends Controller
                     ->update([
                         'nombre' => $request->nombre,
                         'apellidos' => $request->apellidos,
-                        'tipo' => SodiumUtil::decryptData($request->tipo),
+                        'tipo' => $request->tipo,
                         'updated_at' => Carbon::now()
                     ]);
                 return response()->json(formatErrorResponse(false, 'Usuario actualizado con exito.', []));
@@ -190,7 +200,6 @@ class UserController extends Controller
     public static function updatePassword(Request $request, $id)
     {
         try {
-            $id = SodiumUtil::decryptData($id);
             $rulesValidation = [
                 //'nueva_contrasena' => 'required|min:8',
                 //'confirmar_contrasena' => 'required|same:nueva_contrasena',
@@ -206,7 +215,7 @@ class UserController extends Controller
             DB::table('users')
                 ->where('id', $id)
                 ->update([
-                    'password' => Hash::make(SodiumUtil::decryptData($request->nueva_contrasena)),
+                    'password' => Hash::make($request->nueva_contrasena),
                     'updated_at' =>  Carbon::now()
                 ]);
 
@@ -219,15 +228,25 @@ class UserController extends Controller
     public static function enableDeleteUser($id)
     {
         try {
-            $id = SodiumUtil::decryptData($id);
-            if (DB::table('users')->where('id', $id)->exists()) {
-                DB::table('users')
-                    ->where('id', $id)
-                    ->update([
-                        'status' => 'Activo',
-                        'updated_at' => Carbon::now()
-                    ]);
-                return response()->json(formatErrorResponse(false, 'Usuario dado de alta con exito.', []));
+            //$id = $id);
+            $verifyUser = DB::table('users')->where('id', $id)->first();
+            if ($verifyUser) {
+                if ($verifyUser->status == 'Activo') {
+                    DB::table('users')
+                        ->where('id', $id)
+                        ->update([
+                            'status' => 'Inactivo',
+                            'updated_at' => Carbon::now()
+                        ]);
+                } else {
+                    DB::table('users')
+                        ->where('id', $id)
+                        ->update([
+                            'status' => 'Activo',
+                            'updated_at' => Carbon::now()
+                        ]);
+                }
+                return response()->json(formatErrorResponse(false, 'Usuario actualizado con exito.', []));
             } else {
                 return response()->json(formatErrorResponse(true, 'El usuario no existe, verifique e intente de nuevo.', []));
             }
