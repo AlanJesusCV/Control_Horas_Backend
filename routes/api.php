@@ -72,8 +72,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/activity/put-activity/{id}', [ActividadesController::class, 'editActivity']);
     Route::post('/activity/post-validate-activity', [ActividadesController::class, 'validateActivity']);
     Route::delete('/activity/delete-activity/{id}', [ActividadesController::class, 'deleteActivity']);
-    Route::get('/activity/get-activities-by-period/{id}/{fechaInicio}/{fechaFin}', [ActividadesController::class, 'getActivitiesByUser']);
-    Route::get('/activity/get-activities-by-user/{id}/{fechaActividad}', [ActividadesController::class, 'getIndividualActivities']);
+    Route::get('/activity/get-activities-by-period/{id}/{startDate}/{endDate}', [ActividadesController::class, 'getActivitiesByUser']);
+    Route::get('/activity/get-activities-by-user/{id}/{dateActivity}', [ActividadesController::class, 'getIndividualActivities']);
 
     // Actividades Fin
 
