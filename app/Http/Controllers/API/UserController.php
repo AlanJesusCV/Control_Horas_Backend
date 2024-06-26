@@ -144,7 +144,6 @@ class UserController extends Controller
     public static function updateUserMultiple(Request $request, $id)
     {
         try {
-            $id = SodiumUtil::encryptData($id);
             $userData = $request->only(['name', 'last_name', 'tipo', 'user_scl']);
             // Filtra los campos que no están vacíos
             $filteredData = array_filter($userData, function ($value) {

@@ -79,7 +79,6 @@ class ActividadesController extends Controller
                     'tipo_actividad' => $request->tipo_actividad,
                     'fecha_actividad' => $request->fecha_actividad,
                     'horas_actividad' => $request->horas_actividad,
-                    //'id_usuario_asignado' => SodiumUtil::decryptData($request->id_usuario_asignado),
                     'id_usuario_asignado' => $request->id_usuario_asignado,
                     'agregado_por' => auth()->user()->numero_empleado,
                     'created_at' => Carbon::now(),
@@ -115,7 +114,6 @@ class ActividadesController extends Controller
         }
 
         try {
-            //$id = SodiumUtil::decryptData($id);
             $verifyActivity = DB::table('activities')
                 ->leftJoin('users_validate_activities', 'activities.id_actividad', '=', 'users_validate_activities.id_actividad')
                 ->where('activities.id_actividad', $id)
@@ -125,7 +123,6 @@ class ActividadesController extends Controller
                 $timeUserActivity = DB::table('activities')
                     ->selectRaw("EXTRACT(HOUR FROM COALESCE(SUM(horas_actividad), '00:00:00')) || ':' || EXTRACT(MINUTE FROM COALESCE(SUM(horas_actividad), '00:00:00')) as contador_horas")
                     ->leftJoin('users_validate_activities', 'activities.id_actividad', '=', 'users_validate_activities.id_actividad')
-                    //->where('id_usuario_asignado', SodiumUtil::decryptData($request->id_usuario_asignado))
                     ->where('id_usuario_asignado', $request->id_usuario_asignado)
                     ->where('fecha_actividad', $verifyActivity->fecha_actividad)
                     ->where('users_validate_activities.validada', '!=', false)
@@ -179,7 +176,6 @@ class ActividadesController extends Controller
     public function deleteActivity($id)
     {
         try {
-            //$id = SodiumUtil::decryptData($id);
             $verifyActivity = DB::table('activities')
                 ->leftJoin('users_validate_activities', 'activities.id_actividad', '=', 'users_validate_activities.id_actividad')
                 ->where('activities.id_actividad', $id)
@@ -212,15 +208,12 @@ class ActividadesController extends Controller
         try {
             $verifyActivity = DB::table('activities')
                 ->leftJoin('users_validate_activities', 'activities.id_actividad', '=', 'users_validate_activities.id_actividad')
-                //->where('activities.id_actividad', SodiumUtil::decryptData($request->id_actividad))
                 ->where('activities.id_actividad', $request->id_actividad)
                 ->first();
 
             if ($verifyActivity->validada != true) {
-                //DB::table('users_validate_activities')->where('id_actividad', SodiumUtil::decryptData($request->id_actividad))->update([
                 DB::table('users_validate_activities')->where('id_actividad', $request->id_actividad)->update([
                     'validada' => $request->validada,
-                    //'id_user' => SodiumUtil::decryptData($request->id_validador),
                     'id_user' => $request->id_validador,
                     'updated_at' => Carbon::now()
                 ]);

@@ -30,24 +30,13 @@ class AuthController extends Controller
                 return response()->json(formatErrorResponse(true, $validator->errors(), []), 400);
             }
 
-
-            //$emailRequest = SodiumUtil::decryptData($request->email);
-            //$passwordRequest = SodiumUtil::decryptData($request->password);
             $emailRequest = $request->email;
             $passwordRequest = $request->password;
-
-
             if (Auth::attempt(['email' => $emailRequest, 'password' => $passwordRequest])) {
                 $user = DB::table('users')->where('email', $emailRequest)->first();
                 if ($user->status == 'Activo') {
                     $user = Auth::user();
-                    $user->email = SodiumUtil::encryptData($user->email);
-                    //$user->tipo = SodiumUtil::encryptData($user->tipo);
-                    $user->tipo = $user->tipo;
-                    //$user->numero_empleado = SodiumUtil::encryptData($user->numero_empleado);
-                    $user->numero_empleado = $user->numero_empleado;
                     $token = $user->createToken('authToken');
-                    //$plainTextToken = $newAccessToken->plainTextToken;
                     $user->token = $token->plainTextToken;
                     return response()->json(formatErrorResponse(false, 'Inicio Correcto', $user));
                 } else {
